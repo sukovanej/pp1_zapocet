@@ -54,11 +54,43 @@
       a 
       (let ((r (modulo a b))) (euclid b r)))))
 
+; rle-coding
+
+(define get-element 
+  (lambda (input index count) 
+    (if (and (< (+ index 1) (length input)) (eq? (list-ref input index) (list-ref input (+ index 1))))
+      (get-element input (+ index 1) (+ count 1)) 
+      (list (+ index 1) (list-ref input index) count))))
+
+(define all-elements 
+  (lambda (input index result)
+    (let* ((element (get-element input index 1)) (new-index (list-ref element 0)))
+      (if (> (+ new-index 1) (length input))
+        (append result (list (list-ref element 1) (list-ref element 2)))
+        (all-elements input new-index (append result (list (list-ref element 1) (list-ref element 2))))))))
+
 (define rle-coding
-  (lambda (a)
-    (let ((x lambda (counter position last)
-             (if (equal? last (list-ref a position)) 
-               (x (+ counter 1) (+ position 1) last)
-               (cons counter last)))
-          (l (list))
-          (appender (lambda ()
+  (lambda (input)
+    (all-elements input 0 (list))))
+
+; histogram
+
+(define single-list
+  (lambda (input)
+    (apply append input)))
+
+(define count-in-list
+  (lambda (input value)
+    (let* ((filtered (filter (lambda (x) (= x value)) input))
+           (filtered-length (length filtered)))
+      (if (= filtered-length 0)
+          #f
+          (cons value filtered-length)))))
+
+(define histogram
+  (lambda (input)
+    (let ((list-input (single-list input)))
+      (filter
+       (lambda (x) (pair? x))
+       (build-list 256
+                   (lambda (x) (count-in-list list-input x)))))))
